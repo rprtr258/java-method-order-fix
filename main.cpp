@@ -89,24 +89,28 @@ map<string, set<string>> buildGraph(map<string, string> data) {
     return graph;
 }
 
-vector<string> tsort;
-
-void dfs(map<string, set<string>> &graph, string method, map<string, bool> &vis) {
+void dfs(map<string, set<string>> &graph, string method, map<string, bool> &vis, vector<string> &tsort) {
     if (vis[method])
         return;
     vis[method] = true;
     for (auto e : graph[method])
-        dfs(graph, e, vis);
+        dfs(graph, e, vis, tsort);
     tsort.push_back(method);
 }
 
-void dfs(map<string, set<string>> &graph) {
+vector<string> dfs(map<string, set<string>> &graph) {
+    vector<string> tsort;
     map<string, bool> vis;
     for (auto e : graph)
         vis[e.first] = false;
     for (auto e : graph)
-        dfs(graph, e.first, vis);
+        dfs(graph, e.first, vis, tsort);
     reverse(tsort.begin(), tsort.end());
+    return tsort;
+}
+
+vector<string> topsort(map<string, set<string>> graph) {
+    return dfs(graph);
 }
 
 int main(int argc, char **argv) {
@@ -117,7 +121,7 @@ int main(int argc, char **argv) {
     string filename = argv[1];
     map<string, string> data = getMethodsAsMapFromFile(filename);
     map<string, set<string>> graph = buildGraph(data);
-    dfs(graph);
+    vector<string> tsort = topsort(graph);
     for (string method : tsort)
         cout << method << endl;
     return 0;
